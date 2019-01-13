@@ -22,7 +22,8 @@ static const char *RcsId = "$Header: /home/cvsadm/cvsroot/fermi/servers/hdb++/hd
 
 
 #include <HdbDevice.h>
-
+#include <chrono>
+#include <thread>
 
 namespace HdbEventSubscriber_ns
 {
@@ -106,7 +107,7 @@ void *StatsThread::run_undetached(void *ptr)
 		{
 			INFO_STREAM <<"StatsThread::"<< __func__<<": error pushing events="<<e.errors[0].desc<<endl;
 		}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		try
 		{
 			(hdb_dev->_device)->push_change_event("AttributeFailureFreq",&hdb_dev->AttributeFailureFreq);
@@ -115,7 +116,7 @@ void *StatsThread::run_undetached(void *ptr)
 		{
 			INFO_STREAM <<"StatsThread::"<< __func__<<": error pushing events="<<e.errors[0].desc<<endl;
 		}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		try
 		{
 			(hdb_dev->_device)->push_change_event("AttributeRecordFreqList",&hdb_dev->AttributeRecordFreqList[0], attribute_list_tmp.size());
@@ -124,7 +125,7 @@ void *StatsThread::run_undetached(void *ptr)
 		{
 			INFO_STREAM <<"StatsThread::"<< __func__<<": error pushing events="<<e.errors[0].desc<<endl;
 		}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		try
 		{
 			(hdb_dev->_device)->push_change_event("AttributeFailureFreqList",&hdb_dev->AttributeFailureFreqList[0], attribute_list_tmp.size());

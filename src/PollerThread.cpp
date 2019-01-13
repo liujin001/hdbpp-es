@@ -23,7 +23,8 @@ static const char *RcsId = "$Header: /home/cvsadm/cvsroot/fermi/servers/hdb++/hd
 
 #include <HdbDevice.h>
 #include <HdbEventSubscriber.h>
-
+#include <chrono>
+#include <thread>
 
 namespace HdbEventSubscriber_ns
 {
@@ -74,35 +75,35 @@ void *PollerThread::run_undetached(void *ptr)
 			(hdb_dev->_device)->push_archive_event("AttributePendingNumber",&hdb_dev->AttributePendingNumber);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		try
 		{
 			(hdb_dev->_device)->push_change_event("AttributeNumber",&hdb_dev->attr_AttributeNumber_read);
 			(hdb_dev->_device)->push_archive_event("AttributeNumber",&hdb_dev->attr_AttributeNumber_read);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		try
 		{
 			(hdb_dev->_device)->push_change_event("AttributeStartedNumber",&hdb_dev->attr_AttributeStartedNumber_read);
 			(hdb_dev->_device)->push_archive_event("AttributeStartedNumber",&hdb_dev->attr_AttributeStartedNumber_read);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		try
 		{
 			(hdb_dev->_device)->push_change_event("AttributePausedNumber",&hdb_dev->attr_AttributePausedNumber_read);
 			(hdb_dev->_device)->push_archive_event("AttributePausedNumber",&hdb_dev->attr_AttributePausedNumber_read);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		try
 		{
 			(hdb_dev->_device)->push_change_event("AttributeStoppedNumber",&hdb_dev->attr_AttributeStoppedNumber_read);
 			(hdb_dev->_device)->push_archive_event("AttributeStoppedNumber",&hdb_dev->attr_AttributeStoppedNumber_read);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		try
 		{
 			(hdb_dev->_device)->push_change_event("AttributeMaxPendingNumber",&hdb_dev->AttributeMaxPendingNumber);
@@ -115,35 +116,35 @@ void *PollerThread::run_undetached(void *ptr)
 			(hdb_dev->_device)->push_archive_event("AttributeMaxStoreTime",&hdb_dev->attr_AttributeMaxStoreTime_read);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		try
 		{
 			(hdb_dev->_device)->push_change_event("AttributeMinStoreTime",&hdb_dev->attr_AttributeMinStoreTime_read);
 			(hdb_dev->_device)->push_archive_event("AttributeMinStoreTime",&hdb_dev->attr_AttributeMinStoreTime_read);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		try
 		{
 			(hdb_dev->_device)->push_change_event("AttributeMaxProcessingTime",&hdb_dev->attr_AttributeMaxProcessingTime_read);
 			(hdb_dev->_device)->push_archive_event("AttributeMaxProcessingTime",&hdb_dev->attr_AttributeMaxProcessingTime_read);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		try
 		{
 			(hdb_dev->_device)->push_change_event("AttributeMinProcessingTime",&hdb_dev->attr_AttributeMinProcessingTime_read);
 			(hdb_dev->_device)->push_archive_event("AttributeMinProcessingTime",&hdb_dev->attr_AttributeMinProcessingTime_read);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		try
 		{
 			(hdb_dev->_device)->push_change_event("Context",static_cast<HdbEventSubscriber *>(hdb_dev->_device)->attr_Context_read);
 			(hdb_dev->_device)->push_archive_event("Context",static_cast<HdbEventSubscriber *>(hdb_dev->_device)->attr_Context_read);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 
 		if (hdb_dev->shared->is_initialized())
 		{
@@ -157,7 +158,7 @@ void *PollerThread::run_undetached(void *ptr)
 			(hdb_dev->_device)->push_archive_event("AttributeOkNumber",&hdb_dev->attr_AttributeOkNumber_read);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 
 
 		if (hdb_dev->shared->is_initialized())
@@ -173,7 +174,7 @@ void *PollerThread::run_undetached(void *ptr)
 			(hdb_dev->_device)->push_archive_event("AttributeNokNumber",&hdb_dev->attr_AttributeNokNumber_read);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 
 		bool changed = hdb_dev->get_lists(hdb_dev->attribute_list_str, hdb_dev->attribute_started_list_str, hdb_dev->attribute_paused_list_str, hdb_dev->attribute_stopped_list_str, hdb_dev->attribute_context_list_str, hdb_dev->attr_AttributeTTLList_read);
 		if(changed)
@@ -188,7 +189,7 @@ void *PollerThread::run_undetached(void *ptr)
 			(hdb_dev->_device)->push_archive_event("AttributeList",&hdb_dev->attr_AttributeList_read[0], hdb_dev->attribute_list_str_size);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		if(changed)
 		{
 			for (size_t i=0 ; i<hdb_dev->attribute_started_list_str.size() && i < MAX_ATTRIBUTES ; i++)
@@ -201,7 +202,7 @@ void *PollerThread::run_undetached(void *ptr)
 			(hdb_dev->_device)->push_archive_event("AttributeStartedList",&hdb_dev->attr_AttributeStartedList_read[0], hdb_dev->attribute_started_list_str_size);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		if(changed)
 		{
 			for (size_t i=0 ; i<hdb_dev->attribute_paused_list_str.size() && i < MAX_ATTRIBUTES ; i++)
@@ -214,7 +215,7 @@ void *PollerThread::run_undetached(void *ptr)
 			(hdb_dev->_device)->push_archive_event("AttributePausedList",&hdb_dev->attr_AttributePausedList_read[0], hdb_dev->attribute_paused_list_str_size);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		if(changed)
 		{
 			for (size_t i=0 ; i<hdb_dev->attribute_stopped_list_str.size() && i < MAX_ATTRIBUTES ; i++)
@@ -227,7 +228,7 @@ void *PollerThread::run_undetached(void *ptr)
 			(hdb_dev->_device)->push_archive_event("AttributeStoppedList",&hdb_dev->attr_AttributeStoppedList_read[0], hdb_dev->attribute_stopped_list_str_size);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		if(changed)
 		{
 			for (size_t i=0 ; i<hdb_dev->attribute_context_list_str.size() && i < MAX_ATTRIBUTES ; i++)
@@ -240,14 +241,14 @@ void *PollerThread::run_undetached(void *ptr)
 			(hdb_dev->_device)->push_archive_event("AttributeStrategyList",&hdb_dev->attr_AttributeContextList_read[0], hdb_dev->attribute_context_list_str_size);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 		try
 		{
 			(hdb_dev->_device)->push_change_event("AttributeTTLList",&hdb_dev->attr_AttributeTTLList_read[0], hdb_dev->attribute_list_str_size);
 			(hdb_dev->_device)->push_archive_event("AttributeTTLList",&hdb_dev->attr_AttributeTTLList_read[0], hdb_dev->attribute_list_str_size);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 
 		hdb_dev->get_sig_not_on_error_list(hdb_dev->attribute_ok_list_str);
 		//changed = is_list_changed(hdb_dev->attribute_ok_list_str, hdb_dev->old_attribute_ok_list_str);
@@ -263,7 +264,7 @@ void *PollerThread::run_undetached(void *ptr)
 			(hdb_dev->_device)->push_archive_event("AttributeOkList",&hdb_dev->attr_AttributeOkList_read[0], hdb_dev->attribute_ok_list_str_size);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 
 		hdb_dev->get_sig_on_error_list(hdb_dev->attribute_nok_list_str);
 		//changed = is_list_changed(hdb_dev->attribute_nok_list_str, hdb_dev->old_attribute_nok_list_str);
@@ -279,7 +280,7 @@ void *PollerThread::run_undetached(void *ptr)
 			(hdb_dev->_device)->push_archive_event("AttributeNokList",&hdb_dev->attr_AttributeNokList_read[0], hdb_dev->attribute_nok_list_str_size);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 
 		hdb_dev->get_sig_list_waiting(hdb_dev->attribute_pending_list_str);
 		//changed = is_list_changed(hdb_dev->attribute_pending_list_str, hdb_dev->old_attribute_pending_list_str);
@@ -295,7 +296,7 @@ void *PollerThread::run_undetached(void *ptr)
 			(hdb_dev->_device)->push_archive_event("AttributePendingList",&hdb_dev->attr_AttributePendingList_read[0], hdb_dev->attribute_pending_list_str_size);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 
 		changed = hdb_dev->get_error_list(hdb_dev->attribute_error_list_str);
 		if(changed)
@@ -310,7 +311,7 @@ void *PollerThread::run_undetached(void *ptr)
 			(hdb_dev->_device)->push_archive_event("AttributeErrorList",&hdb_dev->attr_AttributeErrorList_read[0], hdb_dev->attribute_error_list_str_size);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 
 
 		hdb_dev->get_event_number_list();
@@ -320,7 +321,7 @@ void *PollerThread::run_undetached(void *ptr)
 			(hdb_dev->_device)->push_archive_event("AttributeEventNumberList",&hdb_dev->AttributeEventNumberList[0], hdb_dev->attr_AttributeNumber_read);
 		}
 		catch(Tango::DevFailed &e){}
-		usleep(1000);
+		this_thread::sleep_for(chrono::microseconds{1000});
 
 	}
 	INFO_STREAM <<"PollerThread::"<< __func__<<": exiting..."<<endl;

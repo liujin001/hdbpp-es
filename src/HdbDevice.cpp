@@ -49,11 +49,41 @@ static const char *RcsId = "$Header: /home/cvsadm/cvsroot/fermi/servers/hdb++/hd
 
 
 
+#if defined(_WIN32) || defined(WIN32)	// #ifdef _TG_WINDOWS_
+	#include <WinSock2.h>
+	#include <Ws2tcpip.h>
+	#ifdef interface
+		#undef interface
+	#endif
+#else
+	#include <netdb.h> //for getaddrinfo
+#endif
 
 #include <HdbDevice.h>
 #include <HdbEventSubscriber.h>
-#include <sys/time.h>
-#include <netdb.h> //for getaddrinfo
+#include <chrono>
+#include <thread>
+
+#ifdef _TG_WINDOWS_
+int gettimeofday(struct timeval *tp, void *tzp)
+{
+	time_t clock;
+	struct tm t;
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+	t.tm_year = st.wYear - 1900;
+	t.tm_mon = st.wMonth -1;
+	t.tm_mday = st.wDay;
+	t.tm_hour = st.wHour;
+	t.tm_min = st.wMinute;
+	t.tm_sec = st.wSecond;
+	t.tm_isdst = -1;
+	clock = mktime(&t);
+	tp->tv_sec = clock;
+	tp->tv_usec = st.wMilliseconds*1000;
+	return(0);
+}
+#endif
 
 namespace HdbEventSubscriber_ns
 {
@@ -78,7 +108,7 @@ HdbDevice::~HdbDevice()
 	DEBUG_STREAM << "	Subscribe thread Stopped " << endl;
 	thread->join(0);
 	DEBUG_STREAM << "	Subscribe thread Joined " << endl;
-	usleep(100000);
+	this_thread::sleep_for(chrono::microseconds{100000});
 	DEBUG_STREAM << "	Stopping push thread" << endl;
 	push_shared->stop_thread();
 	DEBUG_STREAM << "	Push thread Stopped " << endl;
@@ -177,7 +207,7 @@ void HdbDevice::initialize()
 	//	Wait end of first subscribing loop
 	do
 	{
-		sleep(1);
+		this_thread::sleep_for(chrono::seconds{1});
 	}
 	while( !shared->is_initialized() );
 }
@@ -1032,7 +1062,7 @@ void HdbDevice::add_domain(string &str)
 		}
 		string::size_type	end2 = str.find(":", start);
 
-		string th = str.substr(start, end2);
+		string th = str.substr(start, end2-start);
 		string with_domain = str;
 
 		map<string,string>::iterator it_domain = domain_map.find(th);
@@ -1044,6 +1074,16 @@ void HdbDevice::add_domain(string &str)
 			return;
 		}
 
+		int ret;
+	#ifdef _TG_WINDOWS_
+		WSADATA wsaData;
+		ret = WSAStartup(MAKEWORD(2, 2), &wsaData);
+		if (ret != 0) {
+			cout << __func__ << "WSAStartup failed, error code= : " << ret << endl;
+			return;
+		}
+	#endif
+
 		struct addrinfo hints;
 //		hints.ai_family = AF_INET; // use AF_INET6 to force IPv6
 //		hints.ai_flags = AI_CANONNAME|AI_CANONIDN;
@@ -1052,20 +1092,28 @@ void HdbDevice::add_domain(string &str)
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_flags = AI_CANONNAME;
 		struct addrinfo *result, *rp;
-		int ret = getaddrinfo(th.c_str(), NULL, &hints, &result);
+		ret = getaddrinfo(th.c_str(), NULL, &hints, &result);
 		if (ret != 0)
 		{
 			INFO_STREAM << __func__<< ": getaddrinfo error=" << gai_strerror(ret);
+		#ifdef _TG_WINDOWS_
+			WSACleanup();
+		#endif
 			return;
 		}
 
 		for (rp = result; rp != NULL; rp = rp->ai_next)
 		{
+			if(NULL == rp->ai_canonname) // the 2nd addrinfo's ai_canoname is NULL ?
+				break;
 			with_domain = string(rp->ai_canonname) + str.substr(end2);
 			DEBUG_STREAM << __func__ <<": found domain -> " << with_domain<<endl;
 			domain_map.insert(make_pair(th, with_domain));
 		}
 		freeaddrinfo(result); // all done with this structure
+	#ifdef _TG_WINDOWS_
+		WSACleanup();
+	#endif
 		str = with_domain;
 		return;
 	}
@@ -1124,6 +1172,17 @@ void HdbDevice::add_domain(string &str)
 	{
 		string_explode(facility,",",&facilities);
 	}
+
+	int ret;
+#ifdef _TG_WINDOWS_
+	WSADATA wsaData;
+	ret = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (ret != 0) {
+		cout << __func__ << "WSAStartup failed, error code= : " << ret << endl;
+		return;
+	}
+#endif
+
 	for(vector<string>::iterator it = facilities.begin(); it != facilities.end(); it++)
 	{
 		string::size_type	end1 = it->find(".");
@@ -1147,7 +1206,7 @@ void HdbDevice::add_domain(string &str)
 					strresult += ",";
 				continue;
 			}
-			string th = it->substr(start, end2);
+			string th = it->substr(start, end2-start);
 			string port = it->substr(end2);
 			string with_domain = *it;
 
@@ -1171,7 +1230,7 @@ void HdbDevice::add_domain(string &str)
 			hints.ai_socktype = SOCK_STREAM;
 			hints.ai_flags = AI_CANONNAME;
 			struct addrinfo *result, *rp;
-			int ret = getaddrinfo(th.c_str(), NULL, &hints, &result);
+			ret = getaddrinfo(th.c_str(), NULL, &hints, &result);
 			if (ret != 0)
 			{
 				INFO_STREAM << __func__<< ": getaddrinfo error='" << gai_strerror(ret)<<"' while looking for " << th<<endl;
@@ -1183,6 +1242,8 @@ void HdbDevice::add_domain(string &str)
 
 			for (rp = result; rp != NULL; rp = rp->ai_next)
 			{
+				if(NULL == rp->ai_canonname) // the 2nd addrinfo's ai_canoname is NULL ?
+					break;
 				with_domain = string(rp->ai_canonname) + port;
 				domain_map.insert(make_pair(th, string(rp->ai_canonname)));
 			}
@@ -1201,6 +1262,9 @@ void HdbDevice::add_domain(string &str)
 		}
 	}
 	str = strresult;
+#ifdef _TG_WINDOWS_
+	WSACleanup();
+#endif
 }
 string HdbDevice::remove_domain(string str)
 {

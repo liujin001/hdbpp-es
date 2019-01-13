@@ -1084,7 +1084,11 @@ void SharedData::add(string &signame, const vector<string> & contexts, Tango::De
 		signal->first = true;
 		signal->first_err = true;
 		signal->periodic_ev = -1;
+	#ifdef _TG_WINDOWS_
+		timespec_get(&signal->last_ev, TIME_UTC);
+	#else
 		clock_gettime(CLOCK_MONOTONIC, &signal->last_ev);
+	#endif
 
 		if(found && start)
 		{
@@ -1935,7 +1939,11 @@ void  SharedData::set_ok_event(string &signame)
 			signals[i].okev_counter_freq++;
 			signals[i].first_err = true;
 			gettimeofday(&signals[i].last_okev, NULL);
+		#ifdef _TG_WINDOWS_
+			timespec_get(&signals[i].last_ev, TIME_UTC);
+		#else
 			clock_gettime(CLOCK_MONOTONIC, &signals[i].last_ev);
+		#endif
 			signals[i].siglock->writerOut();
 			return;
 		}
@@ -1955,7 +1963,11 @@ void  SharedData::set_ok_event(string &signame)
 			signals[i].okev_counter_freq++;
 			signals[i].first_err = true;
 			gettimeofday(&signals[i].last_okev, NULL);
+		#ifdef _TG_WINDOWS_
+			timespec_get(&signals[i].last_ev, TIME_UTC);
+		#else
 			clock_gettime(CLOCK_MONOTONIC, &signals[i].last_ev);
+		#endif
 			signals[i].siglock->writerOut();
 			return;
 		}
@@ -2113,7 +2125,11 @@ void  SharedData::set_nok_event(string &signame)
 			signals[i].nokev_counter++;
 			signals[i].nokev_counter_freq++;
 			gettimeofday(&signals[i].last_nokev, NULL);
+		#ifdef _TG_WINDOWS_
+			timespec_get(&signals[i].last_ev, TIME_UTC);
+		#else
 			clock_gettime(CLOCK_MONOTONIC, &signals[i].last_ev);
+		#endif
 			signals[i].siglock->writerOut();
 			return;
 		}
@@ -2130,7 +2146,11 @@ void  SharedData::set_nok_event(string &signame)
 			signals[i].nokev_counter++;
 			signals[i].nokev_counter_freq++;
 			gettimeofday(&signals[i].last_nokev, NULL);
+		#ifdef _TG_WINDOWS_
+			timespec_get(&signals[i].last_ev, TIME_UTC);
+		#else
 			clock_gettime(CLOCK_MONOTONIC, &signals[i].last_ev);
+		#endif
 			signals[i].siglock->writerOut();
 			return;
 		}
@@ -2551,7 +2571,11 @@ int  SharedData::check_periodic_event_timeout(int delay_tolerance_ms)
 {
 	ReaderLock lock(veclock);
 	timespec now;
+#ifdef _TG_WINDOWS_
+	timespec_get(&now, TIME_UTC);
+#else
 	clock_gettime(CLOCK_MONOTONIC, &now);
+#endif
 	double min_time_to_timeout_ms = 10000;
 	for (unsigned int i=0 ; i<signals.size() ; i++)
 	{

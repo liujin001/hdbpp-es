@@ -36,7 +36,11 @@ CheckPeriodicThread::CheckPeriodicThread(HdbDevice *dev): Tango::LogAdapter(dev-
 	abortflag = false;
 	last_check.tv_sec = 0;
 	last_check.tv_nsec = 0;
+#ifdef _TG_WINDOWS_
+	timespec_get(&last_check, TIME_UTC);
+#else
 	clock_gettime(CLOCK_MONOTONIC, &last_check);
+#endif
 }
 //=============================================================================
 //=============================================================================

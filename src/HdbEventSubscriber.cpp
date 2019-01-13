@@ -306,7 +306,11 @@ void HdbEventSubscriber::init_device()
 		INFO_STREAM << status << endl;
 	}
 	timespec now;
+#ifdef _TG_WINDOWS_
+	timespec_get(&now, TIME_UTC);
+#else
 	clock_gettime(CLOCK_MONOTONIC, &now);
+#endif
 	double dnow = (now.tv_sec) + ((double)(now.tv_nsec))/1000000000;
 	last_statistics_reset_time = dnow;
 
@@ -677,7 +681,12 @@ void HdbEventSubscriber::read_AttributeRecordFreq(Tango::Attribute &attr)
 	if(*attr_AttributeRecordFreq_read == -1)
 		attr.set_quality(Tango::ATTR_INVALID);
 	else
+	#ifdef _TG_WINDOWS_
+		// On Windows the 2nd para type is time_t, why not timeval??
+		attr.set_value_date_quality(attr_AttributeRecordFreq_read, hdb_dev->stats_thread->last_stat.tv_sec, Tango::ATTR_VALID);
+	#else
 		attr.set_value_date_quality(attr_AttributeRecordFreq_read, hdb_dev->stats_thread->last_stat, Tango::ATTR_VALID);
+	#endif
 	
 	/*----- PROTECTED REGION END -----*/	//	HdbEventSubscriber::read_AttributeRecordFreq
 }
@@ -698,7 +707,12 @@ void HdbEventSubscriber::read_AttributeFailureFreq(Tango::Attribute &attr)
 	if(*attr_AttributeFailureFreq_read == -1)
 		attr.set_quality(Tango::ATTR_INVALID);
 	else
-		attr.set_value_date_quality(attr_AttributeFailureFreq_read, hdb_dev->stats_thread->last_stat, Tango::ATTR_VALID);
+	#ifdef _TG_WINDOWS_
+		// On Windows the 2nd para type is time_t, why not timeval??
+		attr.set_value_date_quality(attr_AttributeRecordFreq_read, hdb_dev->stats_thread->last_stat.tv_sec, Tango::ATTR_VALID);
+	#else
+		attr.set_value_date_quality(attr_AttributeRecordFreq_read, hdb_dev->stats_thread->last_stat, Tango::ATTR_VALID);
+	#endif
 	/*----- PROTECTED REGION END -----*/	//	HdbEventSubscriber::read_AttributeFailureFreq
 }
 //--------------------------------------------------------
@@ -767,7 +781,11 @@ void HdbEventSubscriber::read_StatisticsResetTime(Tango::Attribute &attr)
 	DEBUG_STREAM << "HdbEventSubscriber::read_StatisticsResetTime(Tango::Attribute &attr) entering... " << endl;
 	/*----- PROTECTED REGION ID(HdbEventSubscriber::read_StatisticsResetTime) ENABLED START -----*/
 	timespec now;
+#ifdef _TG_WINDOWS_
+	timespec_get(&now, TIME_UTC);
+#else
 	clock_gettime(CLOCK_MONOTONIC, &now);
+#endif
 	double dnow = (now.tv_sec) + ((double)(now.tv_nsec))/1000000000;
 	*attr_StatisticsResetTime_read = dnow - last_statistics_reset_time;
 	//	Set the attribute value
@@ -962,7 +980,12 @@ void HdbEventSubscriber::read_AttributeRecordFreqList(Tango::Attribute &attr)
 	if(*attr_AttributeRecordFreq_read == -1)
 		attr.set_quality(Tango::ATTR_INVALID);
 	//	Set the attribute value
+#ifdef _TG_WINDOWS_
+	// On Windows the 2nd para type is time_t, why not timeval??
+	attr.set_value_date_quality(attr_AttributeRecordFreqList_read, hdb_dev->stats_thread->last_stat.tv_sec, Tango::ATTR_VALID, hdb_dev->attr_AttributeNumber_read);
+#else
 	attr.set_value_date_quality(attr_AttributeRecordFreqList_read, hdb_dev->stats_thread->last_stat, Tango::ATTR_VALID, hdb_dev->attr_AttributeNumber_read);
+#endif
 	
 	/*----- PROTECTED REGION END -----*/	//	HdbEventSubscriber::read_AttributeRecordFreqList
 }
@@ -982,7 +1005,12 @@ void HdbEventSubscriber::read_AttributeFailureFreqList(Tango::Attribute &attr)
 	if(*attr_AttributeFailureFreq_read == -1)
 		attr.set_quality(Tango::ATTR_INVALID);
 	//	Set the attribute value
+#ifdef _TG_WINDOWS_
+	// On Windows the 2nd para type is time_t, why not timeval??
+	attr.set_value_date_quality(attr_AttributeRecordFreqList_read, hdb_dev->stats_thread->last_stat.tv_sec, Tango::ATTR_VALID, hdb_dev->attr_AttributeNumber_read);
+#else
 	attr.set_value_date_quality(attr_AttributeFailureFreqList_read, hdb_dev->stats_thread->last_stat, Tango::ATTR_VALID, hdb_dev->attr_AttributeNumber_read);
+#endif
 	/*----- PROTECTED REGION END -----*/	//	HdbEventSubscriber::read_AttributeFailureFreqList
 }
 //--------------------------------------------------------
@@ -1584,7 +1612,11 @@ void HdbEventSubscriber::reset_statistics()
 	//	Add your own code
 	hdb_dev->reset_statistics();
 	timespec now;
+#ifdef _TG_WINDOWS_
+	timespec_get(&now, TIME_UTC);
+#else
 	clock_gettime(CLOCK_MONOTONIC, &now);
+#endif
 	double dnow = (now.tv_sec) + ((double)(now.tv_nsec))/1000000000;
 	last_statistics_reset_time = dnow;
 	

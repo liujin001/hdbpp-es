@@ -78,6 +78,10 @@
 #endif	/*	WIN32		*/
 #endif	/*	TIME_VAR	*/
 
+#ifdef _TG_WINDOWS_
+int gettimeofday(struct timeval *tp, void *tzp);
+#endif
+
 #define STATUS_SUBSCRIBED	string("Subscribed")
 #define STATUS_DB_ERROR		string("Storing Error")
 
